@@ -61,15 +61,17 @@ class GALDA():
         self.VW = np.array(self.VW)
         self.Vr = np.array([self.D + 2 for _ in range(self.classnum)])
 
+        # ELBO history
+        self.ELBOhist = []
+
     def CalucuSecond(self, forward, middle, back):
         res = np.dot(middle, back)
         res = np.dot(forward, res)
         return res
 
     def train(self, Maxiter=1000, th=1.0e-4):
+        beforELBO = float('inf')
         for _ in range(Maxiter):
-            beforELBO = float('inf')
-
             print('iteration....', _)
             self.Renew_qz()
             self.Renew_qmusigma()
@@ -80,9 +82,12 @@ class GALDA():
             # for k in range(self.classnum):
             #     print(self.Vr[k] * self.VW[k])
             ELBO = self.CaluELBO()
+            self.ELBOhist.append(ELBO)
             print('ELBO: {}'.format(ELBO))
-    
-            if abs(beforELBO - ELBO) < th:
+
+            diff = abs(beforELBO - ELBO)
+            print('diff_beforELBO_ELBO', diff)
+            if diff < th:
                 print('converged')
                 break
 
